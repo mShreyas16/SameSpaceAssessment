@@ -31,6 +31,7 @@ class MediaViewController: UIViewController {
     var imageArray = [UIImage]()
     var songListDelegate: ViewController?
     var gradient = CAGradientLayer()
+    var currentColor : UIColor?
     
     
     override func viewDidLoad() {
@@ -126,35 +127,40 @@ class MediaViewController: UIViewController {
             } else {
                 self.songListDelegate?.img_PlayPauseStrip.image = UIImage(named: "Playbtn")
             }
-            
+            self.songListDelegate?.stripColor = self.currentColor
+            self.songListDelegate?.view_StipBackGround.backgroundColor = self.currentColor
         }
     }
     
     
     func setGradient() {
-        var color2 = CGColor(red: 0/255, green: 0/255, blue: 0/255, alpha: 1.0)
-        var color1 = getColor()
+
+        var color1 = getColor(iscolor1: true)
+        self.view.backgroundColor = color1
+        currentColor = color1
+        return
+        var color2 = getColor(iscolor1: false)
         print(color1, "gfchgcj")
         
         gradient.removeFromSuperlayer()
         gradient.colors = [color1, color2]
         gradient.locations = [0.0 , 1.0]
-        gradient.startPoint = CGPoint(x: 0.0, y: 1.0)
-        gradient.endPoint = CGPoint(x: 1.0, y: 1.0)
+                            gradient.startPoint = CGPoint(x: 0.0, y: 1.0)
+                            gradient.endPoint = CGPoint(x: 1.0, y: 1.0)
         gradient.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.size.width, height: self.view.frame.size.height)
         
-        self.baseView.layer.insertSublayer(gradient, at: 0)
+        self.view.layer.insertSublayer(gradient, at: 0)
         
     }
     
     
-    func getColor() -> UIColor {
+    func getColor(iscolor1: Bool) -> UIColor {
         let cell = pageControl.cellForItem(at: selectedSongIndex)
         var color: UIColor?
         
         if let imageView = cell?.imageView, 
             let image = imageView.image {
-            let colo = image.getPixelColor(pos: CGPoint(x: 0, y: 0))
+            let colo = image.getPixelColor(pos: iscolor1 ?  CGPoint(x: 5, y: 5) : CGPoint(x: imageView.frame.width - 10, y: imageView.frame.height - 10) )
             color = colo
             print("colorr", colo, "colorr")
         }
@@ -164,7 +170,6 @@ class MediaViewController: UIViewController {
     
     func popTheVC() {
         
-
         self.navigationController?.popViewController(animated: true)
     }
     
@@ -180,11 +185,16 @@ class MediaViewController: UIViewController {
             pageControl.scrollToItem(at: selectedSongIndex - 1, animated: true)
             selectedSongIndex = selectedSongIndex - 1
             songListDelegate?.playTheSong(songUrl: songsListObject?.data[selectedSongIndex].url ?? "")
+            lbl_SongName.text = songsListObject?.data[selectedSongIndex].name
+            lbl_ArtistNAme.text = songsListObject?.data[selectedSongIndex].artist
+            figureOutProgress()
             if songListDelegate?.play == false {
                 songListDelegate?.play = true
                 img_PlayPause.image = UIImage(named: "Pause")
             }
-            setGradient()
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                self.setGradient()
+            }
             resetTimer()
         }
     }
@@ -196,11 +206,16 @@ class MediaViewController: UIViewController {
             pageControl.scrollToItem(at: selectedSongIndex + 1, animated: true)
             selectedSongIndex = selectedSongIndex + 1
             songListDelegate?.playTheSong(songUrl: songsListObject?.data[selectedSongIndex].url ?? "")
+            lbl_SongName.text = songsListObject?.data[selectedSongIndex].name
+            lbl_ArtistNAme.text = songsListObject?.data[selectedSongIndex].artist
+            figureOutProgress()
             if songListDelegate?.play == false {
                 songListDelegate?.play = true
                 img_PlayPause.image = UIImage(named: "Pause")
             }
-            setGradient()
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                self.setGradient()
+            }
             resetTimer()
 
         }
@@ -228,12 +243,16 @@ extension MediaViewController : FSPagerViewDelegate, FSPagerViewDataSource {
     func pagerViewDidEndDecelerating(_ pagerView: FSPagerView) {
         selectedSongIndex = pagerView.currentIndex
         songListDelegate?.playTheSong(songUrl: songsListObject?.data[selectedSongIndex].url ?? "")
+        lbl_SongName.text = songsListObject?.data[selectedSongIndex].name
+        lbl_ArtistNAme.text = songsListObject?.data[selectedSongIndex].artist
+        figureOutProgress()
         if songListDelegate?.play == false {
             songListDelegate?.play = true
             img_PlayPause.image = UIImage(named: "Pause")
         }
-        setGradient()
-    }
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+            self.setGradient()
+        }    }
     
     
 }

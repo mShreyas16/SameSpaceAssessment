@@ -55,6 +55,7 @@ class ViewController: UIViewController {
     var topTracks: SongListModel?
     var forYouData: SongListModel?
     var currentSongIndex = 0
+    var stripColor : UIColor?
     
     
     
@@ -223,6 +224,7 @@ class ViewController: UIViewController {
         mediaVC.modalPresentationStyle = .fullScreen
         self.present(mediaVC, animated: true)
         audioPlayer?.play()
+        mediaViewC?.figureOutProgress()
     }
     
 }
